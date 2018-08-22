@@ -85,6 +85,20 @@ p.message {
     padding: 1vh;
 }
 
+p.system {
+    margin: 0px;
+    width: 100%;
+    height: 40px;
+    font-size: 2vh;
+    font-family: 'Comfortaa', sans-serif;
+    font-style: italic;
+    font-weight: bold;
+    padding: 1vh;
+    background-color: white;
+    color: gray;
+}
+
+
 .message:nth-child(even) {
     background-color: #81DAF5;
 }
