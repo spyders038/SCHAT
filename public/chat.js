@@ -1,6 +1,7 @@
 $(function () {
+  var host = window.location.hostname
   //make connection
-  var socket = io.connect('http://localhost:3000')
+  var socket = io.connect('http://' + host + ':3000')
 
   //buttons and inputs
   var message = $("#message")
@@ -12,7 +13,7 @@ $(function () {
   var serverAddress = $('#server_address')
   var serverButton = $('#send_server')
   var chatRoomNative = document.getElementById('chatroom')
-
+  serverAddress.val(host)
 
   const scrollToBottom = function () {
     chatRoomNative.scrollTop = chatRoomNative.scrollHeight

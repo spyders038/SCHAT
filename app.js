@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
   //listen on new_message
   socket.on('new_command', (data) => {
     data.username = socket.username
-    manageCommands(io.sockets, data)
+    manageCommands(io.sockets, socket, data)
   })
 
   //listen on typing
