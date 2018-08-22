@@ -9,50 +9,96 @@ $(function () {
   var send_username = $("#send_username")
   var chatroom = $("#chatroom")
   var feedback = $("#feedback")
-
-  //Emit message
-  send_message.click(function () {
-    socket.emit('new_message', {message: message.val()})
-  })
+  var serverAddress = $('#server_address')
+  var serverButton = $('#send_server')
+  var chatRoomNative = document.getElementById('chatroom')
 
 
-// Execute a function when the user releases a key on the keyboard
-  message.keyup(function(event) {
+  const scrollToBottom = function () {
+    chatRoomNative.scrollTop = chatRoomNative.scrollHeight
+  }
+
+  let initSocket = function () {
+//Listen on new_message
+    socket.on("new_message", (data) => {
+      feedback.html('')
+      chatroom.append("<p class='message'>" + data.username + ": " + data.message + "</p>")
+      const shouldScroll = chatRoomNative.scrollTop + chatRoomNative.clientHeight === chatRoomNative.scrollHeight
+      if (!shouldScroll) {
+        scrollToBottom()
+      }
+    })
+
+    //Listen on new_message
+    socket.on("changed_username", (data) => {
+      chatroom.append("<p class='system'>" + data.old + " is now " + data.new + "</p>")
+    })
+
+    //Listen on new_message
+    socket.on("connected_user", (data) => {
+      chatroom.append("<p class='system'>" + data.username + " connected to the room" + "</p>")
+    })
+  }
+
+  let newConnection = function () {
+    socket.disconnect()
+    socket = io.connect('http://' + serverAddress.val() + ':3000')
+    initSocket()
+    chatroom.append("<p class='system'>Server address changed to " + serverAddress.val() + "</p>")
+  }
+
+  //Send message to the server
+  let sendMessage = function () {
+    const messageTxt = message.val()
+    if (messageTxt.startsWith('/')) {
+      socket.emit('new_command', {message: messageTxt})
+    } else {
+      socket.emit('new_message', {message: messageTxt})
+    }
+    message.val('')
+  }
+//Init the socket data
+  initSocket()
+
+  serverAddress.keyup(function (event) {
     // Cancel the default action, if needed
-    event.preventDefault();
+    event.preventDefault()
     // Number 13 is the "Enter" key on the keyboard
     if (event.keyCode === 13) {
-      // Trigger the button element with a click
-      socket.emit('new_message', {message: message.val()})
+      newConnection()
     }
-  });
+  })
+
+  //Change the serverAddress
+  serverButton.click(function () {
+    newConnection()
+  })
+
+// Execute a function when the user releases a key on the keyboard
+  message.keyup(function (event) {
+    // Cancel the default action, if needed
+    event.preventDefault()
+    // Number 13 is the "Enter" key on the keyboard
+    if (event.keyCode === 13) {
+      sendMessage()
+    }
+  })
 
   // Execute a function when the user releases a key on the keyboard
-  username.keyup(function(event) {
+  username.keyup(function (event) {
     // Cancel the default action, if needed
-    event.preventDefault();
+    event.preventDefault()
     // Number 13 is the "Enter" key on the keyboard
     if (event.keyCode === 13) {
       // Trigger the button element with a click
       socket.emit('change_username', {username: username.val()})
     }
-  });
-
-  //Listen on new_message
-  socket.on("new_message", (data) => {
-    feedback.html('')
-    message.val('')
-    chatroom.append("<p class='message'>" + data.username + ": " + data.message + "</p>")
   })
 
-  //Listen on new_message
-  socket.on("changed_username", (data) => {
-    chatroom.append("<p class='system'>" + data.old + " is now " + data.new + "</p>")
-  })
 
-  //Listen on new_message
-  socket.on("connected_user", (data) => {
-    chatroom.append("<p class='system'>" + data.username + " connected to the room" + "</p>")
+//Emit message
+  send_message.click(function () {
+    sendMessage()
   })
 
   //Emit a username

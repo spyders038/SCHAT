@@ -1,4 +1,5 @@
 const express = require('express')
+const manageCommands = require('./commands')
 const app = express()
 
 
@@ -40,8 +41,16 @@ io.on('connection', (socket) => {
 
   //listen on new_message
   socket.on('new_message', (data) => {
+
     //broadcast the new message
     io.sockets.emit('new_message', {message: data.message, username: socket.username})
+  })
+
+
+  //listen on new_message
+  socket.on('new_command', (data) => {
+    data.username = socket.username
+    manageCommands(io.sockets, data)
   })
 
   //listen on typing
